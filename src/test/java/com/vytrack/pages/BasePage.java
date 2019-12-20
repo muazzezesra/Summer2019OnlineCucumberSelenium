@@ -1,9 +1,12 @@
 package com.vytrack.pages;
 
+import com.vytrack.utilities.BrowserUtils;
+import com.vytrack.utilities.Driver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -40,16 +43,16 @@ public class BasePage {
     // waits until loader mask(loading bar, spinning wheel) disappears
     // return true if loader mask is gone, false if something went wrong
     public boolean waitUntilLoaderMaskDisappear() {
-        WebDriverWait wait = new WebDriverWait(Driver.get(), 5);
-
+        WebDriverWait wait = new WebDriverWait(Driver.get(), 30);
         try {
-            wait.until(ExpectedConditions.invisibilityOf(loaderMask));
-            return true; // no loadermask, all good, return true
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div[class='loader-mask shown']")));
+            return true;
         } catch (NoSuchElementException e) {
-            System.out.println("loadermask not found");
-            System.out.println(e.getMessage());
+            System.out.println("Loader mask not found!");
+            e.printStackTrace();
+            return true; // no loader mask, all good, return true
         } catch (WebDriverException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
         return false;
     }
@@ -65,23 +68,37 @@ public class BasePage {
      * @param subModuleName normalize-space() same line .trim() in java
      */
     public void navigateTo(String moduleName, String subModuleName) {
+
+        Actions actions = new Actions(Driver.get());
         String moduleLocator = "//*[normalize-space()='" + moduleName + "' and @class='title title-level-1']";
         String subModuleLocator = "//*[normalize-space()='" + subModuleName + "' and @class='title title-level-2']";
-        WebDriverWait wait = new WebDriverWait(Driver.get(), 10);
+
+        WebDriverWait wait = new WebDriverWait(Driver.get(), 20);
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(moduleLocator)));
+
         WebElement module = Driver.get().findElement(By.xpath(moduleLocator));
         wait.until(ExpectedConditions.visibilityOf(module));
         wait.until(ExpectedConditions.elementToBeClickable(module));
 
         waitUntilLoaderMaskDisappear();
-      // BrowserUtils.clickWithWait(module); // if your click is not working well use it
-        module.click(); //once we clicked on module, submodule should be visible
+
+        BrowserUtils.clickWithWait(module); //if click is not working well
         WebElement subModule = Driver.get().findElement(By.xpath(subModuleLocator));
-        wait.until(ExpectedConditions.visibilityOf(subModule));
-        subModule.click();
+
+        if (!subModule.isDisplayed()) {
+            actions.doubleClick(module).doubleClick().build().perform();
+            try {
+                wait.until(ExpectedConditions.visibilityOf(subModule));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                BrowserUtils.clickWithJS(module);
+            }
+        }
+        BrowserUtils.clickWithWait(subModule); //if click is not working well
         //it waits until page is loaded and ajax calls are done
-        BrowserUtils.waitForPageToLoad(5);
+        BrowserUtils.waitForPageToLoad(10);
     }
+
 
 
     /**

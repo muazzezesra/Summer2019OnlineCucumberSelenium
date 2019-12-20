@@ -8,6 +8,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.junit.Assert;
 
+import java.util.Map;
+
 public class LoginStepDefinitions {
 
     LoginPage loginPage = new LoginPage(); // created login page object
@@ -55,6 +57,17 @@ public class LoginStepDefinitions {
     @Then("user verifies that {string} message is displayed")
     public void user_verifies_that_message_is_displayed(String string) {
         System.out.println("Verified that, "+string+", warning message is displayed");
+    }
+
+   /*
+   Then user logs in as driver with following credentials
+        |username|user160    |
+        |password|UserUser123|
+    */
+    @Then("user logs in as driver with following credentials")
+    public void user_logs_in_as_driver_with_following_credentials(Map<String, String> dataTable) {
+        System.out.println(dataTable);
+        loginPage.login(dataTable.get("username"),dataTable.get("password"));
     }
 
 }

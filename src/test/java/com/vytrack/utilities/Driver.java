@@ -21,9 +21,16 @@ public class Driver {
             switch (browser) {
                 case "chrome":
                     WebDriverManager.chromedriver().setup();
-                    ChromeOptions chromeOptions = new ChromeOptions(); // this is for hiding the test windows. you will not see opening windows.
-                    chromeOptions.setHeadless(true);
-                    driver = new ChromeDriver(chromeOptions);
+                    //to configure chrome browser for tests
+                    driver = new ChromeDriver();
+                    break;
+                case "chrome_headless":
+                    WebDriverManager.chromedriver().setup();
+                    //to configure chrome browser for tests
+                    ChromeOptions options = new ChromeOptions();
+                    //to run tests without interface, set to true
+                    options.setHeadless(true);
+                    driver = new ChromeDriver(options);
                     break;
                 case "firefox":
                     WebDriverManager.firefoxdriver().setup();
